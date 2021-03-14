@@ -64,9 +64,9 @@ Node<Key, Info> Node<Key, Info>::operator=(const Node rhs)
 }
 
 
-//------- Class slist -------//
+//------- Class List-------//
 template <typename Key,typename Info>
-class slist
+class List
 {
     int length;// number of nodes in th list
     Node<Key, Info> *head; // pointer to the first node
@@ -74,11 +74,11 @@ class slist
 public:
 
     //constructors
-    slist() : head(nullptr), tail(nullptr) , length(0){ }
-    slist(const slist<Key, Info> &scdList);
+    List() : head(nullptr), tail(nullptr) , length(0){ }
+    List(const List<Key, Info> &scdList);
 
     //destructor
-    ~slist() { clear(); }
+    ~List() { clear(); }
 
     bool isListEmpty() const
         {return head;}
@@ -153,14 +153,14 @@ public:
 
 
 
-    void join(const slist<Key, Info>& fst, const slist<Key, Info>& snd);
+    void join(const List<Key, Info>& fst, const List<Key, Info>& snd);
     // select <Key, Info> pair from fst or snd
     // where Key value is lower and add this to the result
 
 };
 
 template <typename Key,typename Info>
-slist<Key, Info>::slist(const slist<Key, Info> &scdList)
+List<Key, Info>::List(const List<Key, Info> &scdList)
 {
     head=nullptr;
     tail=nullptr;
@@ -186,7 +186,7 @@ slist<Key, Info>::slist(const slist<Key, Info> &scdList)
 }
 
 template <typename Key,typename Info>
-void slist<Key, Info>::printList() const
+void List<Key, Info>::printList() const
 {
     if(!head)
         cout<<"List is empty."<<endl;
@@ -202,7 +202,7 @@ void slist<Key, Info>::printList() const
 }
 
 template <typename Key,typename Info>
-void slist<Key, Info>::deleteNode(Node<Info, Key> *n)
+void List<Key, Info>::deleteNode(Node<Info, Key> *n)
 {
     Node<Key, Info> *temp;
     if(!head) // list is empty
@@ -243,7 +243,7 @@ void slist<Key, Info>::deleteNode(Node<Info, Key> *n)
 }
 
 template <typename Key,typename Info>
-void slist<Key, Info>::clear()
+void List<Key, Info>::clear()
 {
     Node<Info, Key> *temp=head;
     while(head)
@@ -257,7 +257,7 @@ void slist<Key, Info>::clear()
 }
 
 template <typename Key,typename Info>
-void slist<Key, Info>::insertElement(const Info &info, const Key &key)
+void List<Key, Info>::insertElement(const Info &info, const Key &key)
 {
     Node<Key, Info> *newNode=new Node<Key, Info>(info,key);
 
@@ -276,7 +276,7 @@ void slist<Key, Info>::insertElement(const Info &info, const Key &key)
 }
 
 template <typename Key,typename Info>
-bool slist<Key, Info>::doesNodeExist(const Key& key, const Info& info)
+bool List<Key, Info>::doesNodeExist(const Key& key, const Info& info)
 {
     Node<Key, Info> *temp=head;
     while(temp)
@@ -289,7 +289,7 @@ bool slist<Key, Info>::doesNodeExist(const Key& key, const Info& info)
 }
 
 template <typename Key,typename Info>
-void slist<Key, Info>::join(const slist<Key, Info>& fst,const slist<Key, Info>& snd)
+void List<Key, Info>::join(const List<Key, Info>& fst,const List<Key, Info>& snd)
 {
     if(isListEmpty()==false)
         clear();
