@@ -1,7 +1,9 @@
 #ifndef SLIST_H_INCLUDED
 #define SLIST_H_INCLUDED
-#include <iostream>
-using namespace std;
+//#include <iostream>
+
+using std::cout;
+using std::endl;
 
 
 //------- Class Node -------//
