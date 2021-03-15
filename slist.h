@@ -5,74 +5,27 @@
 using std::cout;
 using std::endl;
 
-
-//------- Class Node -------//
-template <typename Key,typename Info>
-class Node
-{
-    Key key; //key data unique
-    Info info; //data
-    Node<Key, Info> *next; // link to next node
-
-public:
-    // constructors
-    Node (): next(nullptr) {}
-    Node(const Key &newKey,const Info &newInfo): key(newKey),info(newInfo),next(nullptr) {}
-    Node(const Node<Key, Info> &scdNode): key(scdNode.key),info(scdNode.info),next(scdNode.next) {}
-
-    //destructor
-    ~Node() { next=nullptr; }
-
-    //access
-    Info getInfo()
-        { return info;}
-    Key getKey()
-        { return key; }
-    Node<Key, Info>*& refNext() //returns reference to the next
-        { return next; }
-
-    //operators
-    Node<Key, Info> operator=(const Node rhs);
-
-    //output
-    void printNode()const
-    {
-        if(this)
-        {
-            cout<<"Key: "<<key<<"  ";
-            cout<<"Info: "<<info<<endl;
-
-        }
-    }
-
-    //for testing
-    bool isValid() const
-        { return this; }
-    void addNext(Node rhs)
-        { next=&rhs; }
-    void setKey(const Key &newKey)
-        { key=newKey; }
-    void setInfo(const Info &newInfo)
-        { info=newInfo; }
-
-};
-template <typename Key,typename Info>
-Node<Key, Info> Node<Key, Info>::operator=(const Node rhs)
-{
-    info=rhs.info;
-    key=rhs.key;
-    next=rhs.next;
-    return *this;
-}
-
-
 //------- Class List-------//
 template <typename Key,typename Info>
 class List
 {
+    struct Node
+    {
+        Key key;
+        Info info;
+        Node* previous;
+        Node* next;
+
+        Node(Key& newkey, Info& newinfo)
+        {
+            key = newkey;
+            info = newinfo;
+            previous = next = nullptr;
+        }
+    };
     int length;// number of nodes in th list
-    Node<Key, Info> *head; // pointer to the first node
-    Node<Key, Info> *tail; // pointer to the last element
+    Node *head; // pointer to the first node
+    Node *tail; // pointer to the last element
 public:
 
     //constructors
@@ -99,7 +52,7 @@ public:
     // add new node at the end of the list
     // length is incremented by 1
 
-    void deleteNode(Node<Info, Key> *n);
+    void deleteNode(Node *n);
     //Function to delete element from the list
     // length is decremented by 1
 
@@ -111,12 +64,12 @@ public:
     //inserting
     void insert(const Key& newKey,const Info& newInfo)
     {
-        Node<Key,Info> *current;//pointer to traverse the list
-        Node<Key,Info> *trailCurrent; //pointer just before current
-        Node<Key,Info> *newNode; //pointer to create a node
+        Node *current;//pointer to traverse the list
+        Node *trailCurrent; //pointer just before current
+        Node *newNode; //pointer to create a node
         bool found;
-        Node<Key,Info> *newNode = new Node<Key,Info>(newKey,newInfo); //create the node
-        if (!head) //Case 1
+        Node *newNode = new Node(newKey, newInfo); //create the node
+        if (!head) //Case 1 - list is empty
         {
             head = newNode;
             tail = newNode;
@@ -127,24 +80,24 @@ public:
             current = head;
             found = false;
             while (current && !found) //search the list
-                if (current->refKey() >= newKey)
+                if (current->key() >= newKey)
                     found = true;
                 else
                 {
                     trailCurrent = current;
-                    current = current->refNext();
+                    current = current->next();
                 }
             if (current == head) //Case 2
             {
-                newNode->refNext() = head;
+                newNode->next() = head;
                 head = newNode;
                 length++;
             }
 
             else //Case 3
             {
-                trailCurrent->refNext() = newNode;
-                newNode->refNext() = current;
+                trailCurrent->next() = newNode;
+                newNode->next() = current;
                 if (!current)
                     tail = newNode;
                 length++;
@@ -170,19 +123,19 @@ List<Key, Info>::List(const List<Key, Info> &scdList)
 
     if(scdList.head)
     {
-        Node<Key, Info> *temp=scdList.head; // traversal node
+        Node *temp=scdList.head; // traversal node
         length=scdList.length; //copy length
-
-        Node<Key, Info> *newHead=new Node<Info, Key>(temp->refInfo(),temp->refKey()); //creation of a new node which head and tail
+  
+        Node *newHead=new Node(temp->info,temp->info); //creation of a new node which head and tail
         head=newHead;
         tail=newHead;
-        temp=temp->refNext();
+        temp=temp->next;
         while(temp) // duplication of the remainings nodes
         {
-            Node<Info, Key> *newNode=new Node<Info, Key>(temp->refInfo(),temp->refKey());
-            tail->refNext()=newNode;
+            Node *newNode=new Node(temp->info,temp->key);
+            tail->next()=newNode;
             tail=newNode;
-            temp=temp->refNext();
+            temp=temp->next;
         }
     }
 }
@@ -194,19 +147,19 @@ void List<Key, Info>::printList() const
         cout<<"List is empty."<<endl;
     else
     {
-        Node<Info, Key> *temp=head;
+        Node *temp=head;
         while (temp)
         {
-            temp->printNode();
-            temp=temp->refNext();
+            //temp->printNode();
+            temp=temp->next;
         }
     }
 }
 
 template <typename Key,typename Info>
-void List<Key, Info>::deleteNode(Node<Info, Key> *n)
+void List<Key, Info>::deleteNode(Node *n)
 {
-    Node<Key, Info> *temp;
+    Node *temp;
     if(!head) // list is empty
         return;
     else if(head==tail ) // list has only one element
@@ -218,7 +171,7 @@ void List<Key, Info>::deleteNode(Node<Info, Key> *n)
     }
     else if(n==head)
     {
-        n=head->refNext();
+        n=head->next;
         delete head;
         head=n;
         --length;
@@ -226,20 +179,20 @@ void List<Key, Info>::deleteNode(Node<Info, Key> *n)
     else if( n==tail)
     {
         temp=head;
-        while(temp->refNext()!=tail)
-            temp=temp->refNext();
+        while(temp->next!=tail)
+            temp=temp->next();
         delete tail;
         tail=temp;
         --length;
     }
     else //n is in the middle of the list
     {
-        Node<Info, Key> *nNext=n->refNext();
+        Node *nNext=n->next();
         temp=head;
-        while(temp->refNext()!=n)
-            temp=temp->refNext();
+        while(temp->next!=n)
+            temp=temp->next;
         delete n;
-        temp->refNext()=nNext;
+        temp->next=nNext;
         --length;
     }
 }
@@ -247,11 +200,11 @@ void List<Key, Info>::deleteNode(Node<Info, Key> *n)
 template <typename Key,typename Info>
 void List<Key, Info>::clear()
 {
-    Node<Info, Key> *temp=head;
+    Node *temp=head;
     while(head)
     {
         temp=head;
-        head=head->refNext();
+        head=head->next;
         delete temp;
     }
     tail=nullptr;
@@ -261,7 +214,7 @@ void List<Key, Info>::clear()
 template <typename Key,typename Info>
 void List<Key, Info>::insertElement(const Info &info, const Key &key)
 {
-    Node<Key, Info> *newNode=new Node<Key, Info>(info,key);
+    Node *newNode=new Node(key, info);
 
     if(!head)  // list is empty
     {
@@ -271,7 +224,7 @@ void List<Key, Info>::insertElement(const Info &info, const Key &key)
     }
     else // new node is added after the tail
     {
-        tail->refNext()=newNode;
+        tail->next=newNode;
         tail=newNode;
         ++length;
     }
@@ -280,12 +233,12 @@ void List<Key, Info>::insertElement(const Info &info, const Key &key)
 template <typename Key,typename Info>
 bool List<Key, Info>::doesNodeExist(const Key& key, const Info& info)
 {
-    Node<Key, Info> *temp=head;
+    Node *temp=head;
     while(temp)
     {
-        if(temp->refInfo()==info && temp->refKey()==key)
+        if(temp->info==info && temp->key==key)
             return true;
-        temp=temp->refNext();
+        temp=temp->next;
     }
     return false;
 }
@@ -296,31 +249,30 @@ void List<Key, Info>::join(const List<Key, Info>& fst,const List<Key, Info>& snd
     if(isListEmpty()==false)
         clear();
 
-    Node<Key, Info> *fstptr=fst.refHead();
-    Node<Key, Info> *sndptr=snd.refHead();
+    Node *fstptr=fst.refHead();
+    Node *sndptr=snd.refHead();
 
     while(fstptr!=nullptr && sndptr!=nullptr )
     {
-        if(fstptr->refKey()<sndptr->refKey()) // node from fst is added
+        if (fstptr->key < sndptr->key()) // node from fst is added
         {
-            insertElement(fstptr->refInfo(),fstptr->refKey());
-            fstptr=fstptr->refNext();
+            insertElement(fstptr->info, fstptr->key);
+            fstptr = fstptr->next;
 
 
         }
-        else if (fstptr->refKey()==sndptr->refKey()) // since I decide that key is not uniqe both elements are added
+        else if (fstptr->key==sndptr->key) // since I decide that key is not uniqe both elements are added
         {
 
-            insertElement(fstptr->refInfo(),fstptr->refKey());
-            insertElement(sndptr->refInfo(),sndptr->refKey());
-            fstptr=fstptr->refNext();
-            sndptr=sndptr->refNext();
-
+            insertElement(fstptr->info(),fstptr->key);
+            insertElement(sndptr->info(),sndptr->key);
+            fstptr = fstptr->next;
+            sndptr = sndptr->next;
         }
-        else if(fstptr->refKey()>sndptr->refKey()) // node from snd is added
+        else if(fstptr->key>sndptr->key) // node from snd is added
         {
-            insertElement(sndptr->refInfo(),sndptr->refKey());
-            sndptr=sndptr->refNext();
+            insertElement(sndptr->info,sndptr->key);
+            sndptr=sndptr->next;
 
         }
         else
@@ -331,8 +283,8 @@ void List<Key, Info>::join(const List<Key, Info>& fst,const List<Key, Info>& snd
     {
         while(fstptr!=nullptr)
         {
-            insertElement(fstptr->refInfo(),fstptr->refKey());
-            fstptr=fstptr->refNext();
+            insertElement(fstptr->info,fstptr->key);
+            fstptr=fstptr->next;
         }
     }
 
@@ -340,8 +292,8 @@ void List<Key, Info>::join(const List<Key, Info>& fst,const List<Key, Info>& snd
     {
         while(sndptr!=nullptr)
         {
-            insertElement(sndptr->refInfo(),sndptr->refKey());
-            sndptr=sndptr->refNext();
+            insertElement(sndptr->info, sndptr->key);
+            sndptr=sndptr->next;
         }
     }
 
