@@ -1,6 +1,7 @@
 #ifndef SLIST_H_INCLUDED
 #define SLIST_H_INCLUDED
-//#include <iostream>
+#include <iostream>
+
 
 using std::cout;
 using std::endl;
@@ -11,7 +12,7 @@ class List
 {
     struct Node
     {
-        Key key;
+        Key key; //TO DO: unique data 
         Info info;
         Node* previous;
         Node* next;
@@ -22,88 +23,50 @@ class List
             info = newinfo;
             previous = next = nullptr;
         }
+     
     };
     int length;// number of nodes in th list
     Node *head; // pointer to the first node
     Node *tail; // pointer to the last element
+
+    void deleteNode(const Key& key); //USED BY: erase(const Key& key)
+                                     //Function to delete element from the list
+                                     //length is decremented by 1
+    
+    Node* findNode(const Key& key);  //USED BY: erase(const Key& key)
+                                    //Return pointer to Node with given Key or if it does not exists nullptr
+    
+
 public:
+    List() : head(nullptr), tail(nullptr) , length(0){ } //constructor
+    List(const List<Key, Info> &scdList);     //copy constructor
+ 
+    ~List()   //destructor
+    { clear(); }
 
-    //constructors
-    List() : head(nullptr), tail(nullptr) , length(0){ }
-    List(const List<Key, Info> &scdList);
+    bool isListEmpty() const //returns true if list is nonempty otherwise false
+    {   return head;  }
 
-    //destructor
-    ~List() { clear(); }
+    bool doesNodeExist(const Key& key) //returns true if node exists otherwise false
+    {   return findNode(key);   }      // USES: findNode(const Key& key)
 
-    bool isListEmpty() const
-        {return head;}
+    void erase(const Key& key) //delete node with given key 
+    {   deleteNode(key); }     //USES: findNode(const Key& key), deleteNode(Node* n)
 
-    //output
-    void printList()const;
+    int length() const //access length
+    {   return length;}
+    
 
-    //access
-    int refLength()const
-        { return length;}
+    void clear();  // delete all nodes from the list
+                   // change length to 0
+   
+    void printList() const;  //output the list 
 
-    bool doesNodeExist(const Key &key,const Info &info);
-    //returns true if exists Node with this item
-
-    void insertElement(const Info &info, const Key &key);
-    // add new node at the end of the list
-    // length is incremented by 1
-
-    void deleteNode(Node *n);
-    //Function to delete element from the list
-    // length is decremented by 1
-
-    void clear();
-    // delete all nodes from the list
-    // change length to 0
-
-
+    
+         
     //inserting
-    void insert(const Key& newKey,const Info& newInfo)
-    {
-        Node *current;//pointer to traverse the list
-        Node *trailCurrent; //pointer just before current
-        Node *newNode; //pointer to create a node
-        bool found;
-        Node *newNode = new Node(newKey, newInfo); //create the node
-        if (!head) //Case 1 - list is empty
-        {
-            head = newNode;
-            tail = newNode;
-            length++;
-        }
-        else
-        {
-            current = head;
-            found = false;
-            while (current && !found) //search the list
-                if (current->key() >= newKey)
-                    found = true;
-                else
-                {
-                    trailCurrent = current;
-                    current = current->next();
-                }
-            if (current == head) //Case 2
-            {
-                newNode->next() = head;
-                head = newNode;
-                length++;
-            }
-
-            else //Case 3
-            {
-                trailCurrent->next() = newNode;
-                newNode->next() = current;
-                if (!current)
-                    tail = newNode;
-                length++;
-            }
-        }//end else
-    }//end insert
+    void insert(const Key& newKey, const Info& newInfo);
+    
 
 
 
@@ -121,21 +84,21 @@ List<Key, Info>::List(const List<Key, Info> &scdList)
     tail=nullptr;
     length=0;
 
-    if(scdList.head)
+    if(scdList.head) 
     {
-        Node *temp=scdList.head; // traversal node
+        Node *current=scdList.head; // traversal node
         length=scdList.length; //copy length
   
-        Node *newHead=new Node(temp->info,temp->info); //creation of a new node which head and tail
+        Node *newHead=new Node(current->key,current->info); //creation of a new node which head and tail
         head=newHead;
         tail=newHead;
-        temp=temp->next;
-        while(temp) // duplication of the remainings nodes
+        current=current->next;
+        while(current) // duplication of the remainings nodes
         {
-            Node *newNode=new Node(temp->info,temp->key);
+            Node *newNode=new Node(current->key,current->info);
             tail->next()=newNode;
             tail=newNode;
-            temp=temp->next;
+            current=current->next;
         }
     }
 }
@@ -150,98 +113,124 @@ void List<Key, Info>::printList() const
         Node *temp=head;
         while (temp)
         {
-            //temp->printNode();
+            cout << "Key: " << temp->key << " Info: " << temp->info << endl;
             temp=temp->next;
         }
     }
 }
 
-template <typename Key,typename Info>
-void List<Key, Info>::deleteNode(Node *n)
+template <typename Key, typename Info>
+List<Key, Info>::Node* List<Key, Info>::findNode(const Key& key)
 {
-    Node *temp;
-    if(!head) // list is empty
-        return;
-    else if(head==tail ) // list has only one element
+    Node* current = head;
+    while (current)
     {
-        delete n;
-        head=nullptr;
-        tail=nullptr;
-        length=0;
+        if (current->key == key)
+            return current;
+        current = current->next;
     }
-    else if(n==head)
+    return nullptr;
+}
+
+template <typename Key, typename Info>
+void List<Key, Info>::deleteNode(const Key& key)
+{
+    Node* current = findNode(key);
+
+    if (current)
     {
-        n=head->next;
-        delete head;
-        head=n;
-        --length;
-    }
-    else if( n==tail)
-    {
-        temp=head;
-        while(temp->next!=tail)
-            temp=temp->next();
-        delete tail;
-        tail=temp;
-        --length;
-    }
-    else //n is in the middle of the list
-    {
-        Node *nNext=n->next();
-        temp=head;
-        while(temp->next!=n)
-            temp=temp->next;
-        delete n;
-        temp->next=nNext;
-        --length;
+        if(head == tail) //Case 1 - one element list
+        {
+            delete current;
+            head = nullptr;
+            tail = nullptr;
+            length = 0;
+        }
+        else //Case 2 
+        {
+            current->previous->next = current->next;
+            current->next->previous = current->previous;
+            
+            if (current == head)
+                head = current->next
+            else if(current == tail)
+                tail = current->previous;
+            delete current;
+            length--;   
+        }
     }
 }
 
 template <typename Key,typename Info>
 void List<Key, Info>::clear()
 {
-    Node *temp=head;
+    Node *current=head;
     while(head)
     {
-        temp=head;
+        current=head;
         head=head->next;
-        delete temp;
+        delete current;
     }
     tail=nullptr;
     length=0;
 }
 
 template <typename Key,typename Info>
-void List<Key, Info>::insertElement(const Info &info, const Key &key)
+void List<Key, Info>::insert(const Key& key, const Info& info)
 {
-    Node *newNode=new Node(key, info);
+    if (doesNodeExist(key)) //no duplicates
+        return;
 
-    if(!head)  // list is empty
+    Node* current;//pointer to traverse the list
+    Node* prevCurrent; //pointer just before current
+    bool found;
+    Node* newNode = new Node(newKey, newInfo); //create new node
+    if (!head) //Case 1 - list is empty
     {
-        head=newNode;
-        tail=newNode;
-        ++length;
+        head = newNode;
+        tail = newNode;
+        length++;
     }
-    else // new node is added after the tail
+    else
     {
-        tail->next=newNode;
-        tail=newNode;
-        ++length;
-    }
-}
+        current = head;
+        found = false;
+        while (current && !found)           //search the list 
+        {                                   //newNode will be inserted before current
+            if (current->key > newKey)
+                found = true;
+            else
+            {
+                prevCurrent = current;
+                current = current->next();
+            }
+        }
 
-template <typename Key,typename Info>
-bool List<Key, Info>::doesNodeExist(const Key& key, const Info& info)
-{
-    Node *temp=head;
-    while(temp)
-    {
-        if(temp->info==info && temp->key==key)
-            return true;
-        temp=temp->next;
+
+        if (current == head) //Case 2
+        {
+            newNode->next = head;
+            newNode->previous = tail;
+            head = newNode;
+            length++;
+        }
+        else //Case 3
+        {
+            prevCurrent->next = newNode;
+            newNode->previous = prevCurrent;
+            newNode->next = current;
+            length++;
+
+            if (newNode->key > tail->key)
+            {
+                tail = newNode;
+                return;
+            }
+            current->previous = newNode;
+
+        }
     }
-    return false;
-}
+}//end insert
 
 template <typename Key,typename Info>
 void List<Key, Info>::join(const List<Key, Info>& fst,const List<Key, Info>& snd)
