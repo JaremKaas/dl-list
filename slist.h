@@ -17,13 +17,19 @@ class List
         Node* previous;
         Node* next;
 
-        Node(Key& newkey, Info& newinfo)
+        Node(const Key& newkey,const Info& newinfo)
         {
             key = newkey;
             info = newinfo;
             previous = next = nullptr;
         }
-     
+        ~Node()
+        {
+            if (next)
+                delete next;
+            if (previous)
+                delete previous;
+        }
     };
     int length;// number of nodes in th list
     Node *head; // pointer to the first node
@@ -45,7 +51,7 @@ public:
     { clear(); }
 
     bool isListEmpty() const //returns true if list is nonempty otherwise false
-    {   return head;  }
+    {   return !head;  }
 
     bool doesNodeExist(const Key& key) //returns true if node exists otherwise false
     {   return findNode(key);   }      // USES: findNode(const Key& key)
@@ -179,9 +185,6 @@ void List<Key, Info>::insert(const Key& newKey, const Info& newInfo)
     if (doesNodeExist(newKey)) //no duplicates
         return;
 
-    Node* current;//pointer to traverse the list
-    Node* prevCurrent; //pointer just before current
-    bool found;
     Node* newNode = new Node(newKey, newInfo); //create new node
     if (!head) //Case 1 - list is empty
     {
@@ -191,8 +194,9 @@ void List<Key, Info>::insert(const Key& newKey, const Info& newInfo)
     }
     else
     {
-        current = head;
-        found = false;
+        Node* current = head;//pointer to traverse the list
+        Node* prevCurrent = current->previous; //pointer just before current
+        bool found= false;
         while (current && !found)           //search the list 
         {                                   //newNode will be inserted before current
             if (current->key > newKey)
@@ -200,7 +204,7 @@ void List<Key, Info>::insert(const Key& newKey, const Info& newInfo)
             else
             {
                 prevCurrent = current;
-                current = current->next();
+                current = current->next;
             }
         }
 
