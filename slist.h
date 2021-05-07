@@ -53,14 +53,14 @@ public:
     void erase(const Key& key) //delete node with given key 
     {   deleteNode(key); }     //USES: findNode(const Key& key), deleteNode(Node* n)
 
-    int length() const //access length
+    int refLength() const //access length
     {   return length;}
     
 
     void clear();  // delete all nodes from the list
                    // change length to 0
    
-    void printList() const;  //output the list 
+    void print() const;  //output the list 
 
     
          
@@ -104,8 +104,7 @@ List<Key, Info>::List(const List<Key, Info> &scdList)
 }
 
 template <typename Key,typename Info>
-void List<Key, Info>::printList() const
-{
+void List<Key, Info>::print() const{
     if(!head)
         cout<<"List is empty."<<endl;
     else
@@ -120,8 +119,7 @@ void List<Key, Info>::printList() const
 }
 
 template <typename Key, typename Info>
-List<Key, Info>::Node* List<Key, Info>::findNode(const Key& key)
-{
+typename List<Key, Info>::Node* List<Key, Info>::findNode(const Key& key){
     Node* current = head;
     while (current)
     {
@@ -152,7 +150,7 @@ void List<Key, Info>::deleteNode(const Key& key)
             current->next->previous = current->previous;
             
             if (current == head)
-                head = current->next
+                head = current->next;
             else if(current == tail)
                 tail = current->previous;
             delete current;
@@ -176,9 +174,9 @@ void List<Key, Info>::clear()
 }
 
 template <typename Key,typename Info>
-void List<Key, Info>::insert(const Key& key, const Info& info)
+void List<Key, Info>::insert(const Key& newKey, const Info& newInfo)
 {
-    if (doesNodeExist(key)) //no duplicates
+    if (doesNodeExist(newKey)) //no duplicates
         return;
 
     Node* current;//pointer to traverse the list
