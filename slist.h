@@ -23,13 +23,7 @@ class List
             info = newinfo;
             previous = next = nullptr;
         }
-        ~Node()
-        {
-            if (next)
-                delete next;
-            if (previous)
-                delete previous;
-        }
+        
     };
     int length;// number of nodes in th list
     Node *head; // pointer to the first node
@@ -174,12 +168,54 @@ void List<Key, Info>::clear()
         current=head;
         head=head->next;
         delete current;
+        length--;
     }
-    tail=nullptr;
-    length=0;
 }
 
-template <typename Key,typename Info>
+template <typename Key, typename Info>
+void List<Key, Info>::insert(const Key& newKey, const Info& newInfo){
+
+    if (doesNodeExist(newKey)) //no duplicates
+        return;
+
+    Node* newNode = new Node(newKey, newInfo); //create new node
+    if (!head) //Case 1 - list is empty
+    {
+        head = newNode;
+        tail = newNode;
+        length++;
+    }
+    else
+    {
+        Node* current = head;//pointer to traverse the list
+        Node* prevCurrent = nullptr; //pointer just before current
+        bool found = false;
+        while (current && !found)           //search the list 
+        {                                   //newNode will be inserted before current
+            if (current->key > newKey)
+                found = true;
+            else
+            {
+                prevCurrent = current;
+                current = current->next;
+            }
+        }
+        newNode->previous = prevCurrent;
+        newNode->next = current;
+
+        if (prevCurrent)
+            prevCurrent->next = newNode;
+        if (current)
+            current->previous = newNode;
+        if (!current)
+            tail = newNode;
+        if (current == head)
+            head = newNode;
+        length++;
+
+    }
+}
+/*template <typename Key,typename Info>
 void List<Key, Info>::insert(const Key& newKey, const Info& newInfo)
 {
     if (doesNodeExist(newKey)) //no duplicates
@@ -212,27 +248,26 @@ void List<Key, Info>::insert(const Key& newKey, const Info& newInfo)
         if (current == head) //Case 2
         {
             newNode->next = head;
-            newNode->previous = tail;
             head = newNode;
             length++;
         }
-        else //Case 3
+        else if (current == nullptr) //Case 3 new tail
+        {
+            current->next = newNode;
+            newNode->previous = current;
+            tail = newNode;
+            length++;
+        }
+        else //Case 4
         {
             prevCurrent->next = newNode;
             newNode->previous = prevCurrent;
             newNode->next = current;
-            length++;
-
-            if (newNode->key > tail->key)
-            {
-                tail = newNode;
-                return;
-            }
             current->previous = newNode;
 
         }
     }
-}//end insert
+}//end insert */
 
 template <typename Key,typename Info>
 void List<Key, Info>::join(const List<Key, Info>& fst,const List<Key, Info>& snd)
