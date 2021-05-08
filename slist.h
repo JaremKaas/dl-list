@@ -57,6 +57,12 @@ public:
     {   return length;}
     
 
+    Info getInfo(const Key& key)
+    {
+        Node* current = findNode(key);
+        if (current)
+            return current->info;
+    }
     void clear();  // delete all nodes from the list
                    // change length to 0
    
